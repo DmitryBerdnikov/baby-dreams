@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model Day {
+  id                   Int             @id @default(autoincrement())
+  date                 DateTime        @unique
+  wakeUpTime           DateTime
+  dayDreams            DayDream[]
+  nightDream           NightDream?
+}
+
+model NightDream {
+  id                   Int             @id @default(autoincrement())
+  rating               Int?
+  from                 DateTime
+  to                   DateTime
+  dayId                Int             @unique
+  day                  Day             @relation(fields: [dayId], references: [id])
+  totalAwakeningsCount Int?
+  awakenings           NightDreamAwakenings[]
+}
+
+model NightDreamAwakenings {
+  id                   Int             @id @default(autoincrement())
+  time                 DateTime
+  nightDreamId         Int
+  nightDream           NightDream      @relation(fields: [nightDreamId], references: [id])
+}
+
+model DayDream {       
+  id                   Int             @id @default(autoincrement())
+  from                 DateTime
+  to                   DateTime
+  dayId                Int
+  day                  Day             @relation(fields: [dayId], references: [id])
+}
