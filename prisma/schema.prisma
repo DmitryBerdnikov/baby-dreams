@@ -10,7 +10,7 @@ datasource db {
 
 model Day {
   id                   Int             @id @default(autoincrement())
-  date                 DateTime        @unique
+  date                 String          @unique
   wakeUpTime           DateTime
   dayDreams            DayDream[]
   nightDream           NightDream?
@@ -23,7 +23,6 @@ model NightDream {
   to                   DateTime
   dayId                Int             @unique
   day                  Day             @relation(fields: [dayId], references: [id])
-  totalAwakeningsCount Int?
   awakenings           NightDreamAwakenings[]
 }
 

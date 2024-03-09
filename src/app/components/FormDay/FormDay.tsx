@@ -1,0 +1,293 @@
+'use client'
+
+import { CreateDay } from '@api/day'
+import { useForm, useFieldArray } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { PlusIcon, TrashIcon } from '@radix-ui/react-icons'
+
+import { Button } from '@/components/ui/button'
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+
+type FormDayProps = {
+	onSubmit: (params: CreateDay) => void
+}
+
+const dayDreamSchema = z.object({
+	from: z.string(),
+	to: z.string(),
+})
+
+const nightDreamAwakeningSchema = z.object({
+	time: z.string(),
+})
+
+const formSchema = z.object({
+	dayDate: z.string(),
+	wakeUpTime: z.string(),
+	dayDreams: z.array(dayDreamSchema),
+	nightDreamRating: z.string(),
+	nightDreamFrom: z.string(),
+	nightDreamTo: z.string(),
+	nightDreamAwakenings: z.array(nightDreamAwakeningSchema),
+})
+
+const mapFormDayToCreateDayParams = (
+	values: z.infer<typeof formSchema>
+): CreateDay => {
+	const {
+		dayDate,
+		wakeUpTime,
+		dayDreams,
+		nightDreamFrom,
+		nightDreamTo,
+		nightDreamRating,
+		nightDreamAwakenings,
+	} = values
+
+	const mappedDayDreams = dayDreams.map((item) => ({
+		from: new Date(`${item.from} ${dayDate}`),
+		to: new Date(`${item.to} ${dayDate}`),
+	}))
+
+	const mappedNightDreamAwakenings = nightDreamAwakenings.map((item) => ({
+		time: new Date(`${item.time} ${dayDate}`),
+	}))
+
+	return {
+		wakeUpTime: new Date(`${wakeUpTime} ${dayDate}`),
+		date: dayDate,
+		dayDreams: mappedDayDreams,
+		nightDream: {
+			from: new Date(`${nightDreamFrom} ${dayDate}`),
+			to: new Date(`${nightDreamTo} ${dayDate}`),
+			rating: Number(nightDreamRating),
+		},
+		nightDreamAwakenings: mappedNightDreamAwakenings,
+	}
+}
+
+export const FormDay = ({ onSubmit }: FormDayProps) => {
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			dayDate: new Date().toISOString().substring(0, 10),
+			wakeUpTime: '08:30',
+			dayDreams: [{ from: '12:00', to: '14:30' }],
+		},
+	})
+
+	const dayDreamsFieldsForm = useFieldArray({
+		name: 'dayDreams',
+		control: form.control,
+	})
+
+	const nightDreamAwakeningsFieldsForm = useFieldArray({
+		name: 'nightDreamAwakenings',
+		control: form.control,
+	})
+
+	const onSubmitTest = async (values: z.infer<typeof formSchema>) => {
+		const mappedData = mapFormDayToCreateDayParams(values)
+
+		await onSubmit(mappedData)
+	}
+
+	const addDayDreamHandler = () => {
+		dayDreamsFieldsForm.append({ from: '', to: '' })
+	}
+
+	const deleteDayDreamHandler = (dayDreamIndex: number) => {
+		dayDreamsFieldsForm.remove(dayDreamIndex)
+	}
+
+	const addNightDreamAwakeningHandler = () => {
+		nightDreamAwakeningsFieldsForm.append({ time: '' })
+	}
+
+	const deleteNightDreamAwakeningHandler = (dayDreamIndex: number) => {
+		nightDreamAwakeningsFieldsForm.remove(dayDreamIndex)
+	}
+
+	return (
+		<div className="max-w-96 ml-auto mx-auto py-6">
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmitTest)} className="space-y-4">
+					<FormField
+						control={form.control}
+						name="dayDate"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>День</FormLabel>
+								<FormControl>
+									<Input placeholder="Введите день" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="wakeUpTime"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Время пробуждения</FormLabel>
+								<FormControl>
+									<Input placeholder="Введите время пробуждения" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<div className="text-sm font-medium color-input">Дневные сны</div>
+
+					{dayDreamsFieldsForm.fields.map((_item, index) => (
+						<div key={index} className="flex gap-x-4">
+							<FormField
+								control={form.control}
+								name={`dayDreams.${index}.from`}
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<Input placeholder="Введите время от" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name={`dayDreams.${index}.to`}
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<Input placeholder="Введите время до" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => deleteDayDreamHandler(index)}
+								aria-label="Удалить дневной сон"
+							>
+								<TrashIcon className="h-4 w-4" />
+							</Button>
+						</div>
+					))}
+
+					<Button type="button" variant="outline" onClick={addDayDreamHandler}>
+						Добавить <PlusIcon className="h-4 w-4" />
+					</Button>
+
+					<div className="text-sm font-medium color-input">
+						Ночное засыпание
+					</div>
+
+					<div className="flex gap-x-4">
+						<FormField
+							control={form.control}
+							name="nightDreamFrom"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Input placeholder="Введите время от" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="nightDreamTo"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Input placeholder="Введите время до" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+
+					<FormField
+						control={form.control}
+						name="nightDreamRating"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Рейтинг ночи</FormLabel>
+								<FormControl>
+									<Input
+										type="number"
+										placeholder="Введите рейтинг"
+										min={1}
+										max={5}
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<div className="text-sm font-medium color-input">
+						Ночные просыпания
+					</div>
+
+					{nightDreamAwakeningsFieldsForm.fields.map((_item, index) => (
+						<div key={index} className="flex gap-x-4">
+							<FormField
+								control={form.control}
+								name={`nightDreamAwakenings.${index}.time`}
+								render={({ field }) => (
+									<FormItem className="w-full">
+										<FormControl>
+											<Input placeholder="Введите время" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => deleteNightDreamAwakeningHandler(index)}
+								aria-label="Удалить ночное просыпание"
+							>
+								<TrashIcon className="h-4 w-4" />
+							</Button>
+						</div>
+					))}
+
+					<Button
+						type="button"
+						variant="outline"
+						onClick={addNightDreamAwakeningHandler}
+					>
+						Добавить <PlusIcon className="h-4 w-4" />
+					</Button>
+
+					<Button className="w-full" type="submit">
+						Создать
+					</Button>
+				</form>
+			</Form>
+		</div>
+	)
+}
