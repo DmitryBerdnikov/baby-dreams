@@ -33,11 +33,11 @@ const nightDreamAwakeningSchema = z.object({
 const formSchema = z.object({
 	dayDate: z.string(),
 	wakeUpTime: z.string(),
-	dayDreams: z.array(dayDreamSchema),
-	nightDreamRating: z.string(),
-	nightDreamFrom: z.string(),
-	nightDreamTo: z.string(),
-	nightDreamAwakenings: z.array(nightDreamAwakeningSchema),
+	dayDreams: z.array(dayDreamSchema).optional(),
+	nightDreamRating: z.string().optional(),
+	nightDreamFrom: z.string().optional(),
+	nightDreamTo: z.string().optional(),
+	nightDreamAwakenings: z.array(nightDreamAwakeningSchema).optional(),
 })
 
 const mapFormDayToCreateDayParams = (
@@ -46,11 +46,11 @@ const mapFormDayToCreateDayParams = (
 	const {
 		dayDate,
 		wakeUpTime,
-		dayDreams,
+		dayDreams = [],
 		nightDreamFrom,
 		nightDreamTo,
 		nightDreamRating,
-		nightDreamAwakenings,
+		nightDreamAwakenings = [],
 	} = values
 
 	const mappedDayDreams = dayDreams.map((item) => ({
@@ -67,9 +67,9 @@ const mapFormDayToCreateDayParams = (
 		date: dayDate,
 		dayDreams: mappedDayDreams,
 		nightDream: {
-			from: new Date(`${nightDreamFrom} ${dayDate}`),
-			to: new Date(`${nightDreamTo} ${dayDate}`),
-			rating: Number(nightDreamRating),
+			from: nightDreamFrom ? new Date(`${nightDreamFrom} ${dayDate}`) : null,
+			to: nightDreamTo ? new Date(`${nightDreamTo} ${dayDate}`) : null,
+			rating: nightDreamRating === undefined ? null : Number(nightDreamRating),
 		},
 		nightDreamAwakenings: mappedNightDreamAwakenings,
 	}
@@ -118,7 +118,7 @@ export const FormDay = ({ onSubmit }: FormDayProps) => {
 	}
 
 	return (
-		<div className="max-w-96 ml-auto mx-auto py-6">
+		<div className="max-w-96 ml-auto mx-auto py-6 px-4">
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmitTest)} className="space-y-4">
 					<FormField

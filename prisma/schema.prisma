@@ -19,8 +19,8 @@ model Day {
 model NightDream {
   id                   Int             @id @default(autoincrement())
   rating               Int?
-  from                 DateTime
-  to                   DateTime
+  from                 DateTime?
+  to                   DateTime?
   dayId                Int             @unique
   day                  Day             @relation(fields: [dayId], references: [id])
   awakenings           NightDreamAwakenings[]

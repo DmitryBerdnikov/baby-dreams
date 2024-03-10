@@ -21,7 +21,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { Day } from '@/entities/day'
+import { Day, NightDream } from '@/entities/day'
 import { DayDream } from '@prisma/client'
 
 export const columns: ColumnDef<Day>[] = [
@@ -29,6 +29,21 @@ export const columns: ColumnDef<Day>[] = [
 		accessorKey: 'date',
 		header: 'День',
 		cell: ({ row }) => row.getValue('date'),
+	},
+	{
+		accessorKey: 'nightDreamRating',
+		header: 'Рейтинг ночи',
+		cell: ({ row }) => {
+			const nightDream = row.getValue('nightDream')
+
+			if (!nightDream) {
+				return null
+			}
+
+			const typedNightDream = nightDream as NightDream
+
+			return typedNightDream.rating
+		},
 	},
 	{
 		accessorKey: 'wakeUpTime',
@@ -45,20 +60,58 @@ export const columns: ColumnDef<Day>[] = [
 		},
 		cell: ({ row }) => (
 			<div className="lowercase">
-				{new Date(row.getValue('wakeUpTime')).toLocaleTimeString()}
+				{new Date(row.getValue('wakeUpTime')).toLocaleTimeString().slice(0, -3)}
 			</div>
 		),
 	},
 	{
-		accessorKey: 'dayDreams',
+		accessorKey: 'dayDreamsLength',
 		header: 'Кол-во дневных снов',
 		cell: ({ row }) => {
-      if (!row.getValue('dayDreams')) {
-        return null
-      }
+			if (!row.getValue('dayDreams')) {
+				return null
+			}
 
-      return (row.getValue('dayDreams') as DayDream[]).length
-    },
+			return (row.getValue('dayDreams') as DayDream[]).length
+		},
+	},
+	{
+		accessorKey: 'dayDreams',
+		header: 'Дневные сны',
+		cell: ({ row }) => {
+			const dayDreams = (row.getValue('dayDreams') || []) as DayDream[]
+
+			return (dayDreams as DayDream[]).map((item, index) => (
+				<React.Fragment key={index}>
+					<span>
+						{new Date(item.from).toLocaleTimeString().slice(0, -3)} -{' '}
+						{new Date(item.to).toLocaleTimeString().slice(0, -3)}
+					</span>
+					{index < dayDreams.length - 1 && <span className="mx-2">|</span>}
+				</React.Fragment>
+			))
+		},
+	},
+	{
+		accessorKey: 'nightDream',
+		header: 'Ночь',
+		cell: ({ row }) => {
+			const nightDream = row.getValue('nightDream')
+
+			if (!nightDream) {
+				return null
+			}
+
+			const typedNightDream = nightDream as NightDream
+
+			return (
+				<span>
+					{typedNightDream.from && new Date(typedNightDream.from).toLocaleTimeString().slice(0, -3)}
+					<span className="mx-3">|</span>
+					{typedNightDream.to && new Date(typedNightDream.to).toLocaleTimeString().slice(0, -3)}
+				</span>
+			)
+		},
 	},
 ]
 
