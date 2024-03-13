@@ -1,8 +1,5 @@
-import { createDay } from '@api/day';
-import { FormDay } from './components/FormDay';
+import { HomePageContent } from "./components/HomePageContent";
 
 export default function HomePage() {
-  return (
-    <FormDay onSubmit={createDay} />
-  );
+  return <HomePageContent />
 }

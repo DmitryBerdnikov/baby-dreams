@@ -2,7 +2,6 @@
 
 import { Day, NightDream, NightDreamAwakening } from '@entities/day'
 import prisma from '../app/lib/prisma'
-import { DayDream } from '@prisma/client'
 
 export type CreateDay = {
 	date: string
@@ -87,6 +86,26 @@ export const createDayDreams = async ({
 	return result
 }
 
+export type CreateNightDreamAwakenings = {
+	nightDreamId: number
+	nightDreamAwakenings: {
+		time: Date
+	}[]
+}
+
+export const createNightDreamAwakenings = async ({
+	nightDreamId,
+	nightDreamAwakenings,
+}: CreateNightDreamAwakenings) => {
+	const mappedNightDreamAwakenings = nightDreamAwakenings.map((item) => ({ ...item, nightDreamId }))
+
+	const result = await prisma.nightDreamAwakenings.createMany({
+		data: mappedNightDreamAwakenings,
+	})
+
+	return result
+}
+
 export type CreateNightDream = Omit<NightDream, 'id'>
 
 export const createNightDream = async ({
@@ -115,8 +134,41 @@ export const createNightDream = async ({
 	return result
 }
 
+export type UpdateNightDream = NightDream
+
+export const updateNightDream = async ({
+	id,
+	dayId,
+	from,
+	to,
+	awakenings,
+	rating,
+}: UpdateNightDream) => {
+	const result = await prisma.nightDream.update({
+		where: {
+			id,
+		},
+		data: {
+			dayId,
+			from,
+			to,
+			awakenings: awakenings
+				? {
+						createMany: {
+							data: awakenings,
+						},
+				  }
+				: undefined,
+			rating,
+		},
+	})
+
+	return result
+}
+
 export type UpdateDay = {
 	dayId: number
+	nightDream?: NightDream
 	dayDreams: {
 		from: Date
 		to: Date
@@ -124,30 +176,42 @@ export type UpdateDay = {
 	nightDreamRating?: number
 	nightDreamTo?: Date
 	nightDreamFrom?: Date
+	nightDreamAwakenings?: {
+		time: Date;
+	}[]
 }
 
 export const updateDay = async ({
+	nightDream,
 	dayId,
 	dayDreams,
 	nightDreamFrom,
 	nightDreamTo,
 	nightDreamRating,
+	nightDreamAwakenings = []
 }: UpdateDay) => {
 	if (dayDreams.length > 0) {
-		const createDayDreamsResult = await createDayDreams({ dayId, dayDreams })
+		await createDayDreams({ dayId, dayDreams })
+	}
 
-		console.log({ createDayDreamsResult })
+	if (nightDreamAwakenings.length > 0 && nightDream?.id) {
+		await createNightDreamAwakenings({ nightDreamId: nightDream.id, nightDreamAwakenings })
 	}
 
 	if (nightDreamFrom || nightDreamTo || nightDreamRating) {
-		const createNightDreamResult = await createNightDream({
+		const params = {
 			dayId,
-			from: nightDreamFrom === undefined ? null : nightDreamFrom,
-			to: nightDreamTo === undefined ? null : nightDreamTo,
-			rating: nightDreamRating === undefined ? null : nightDreamRating,
-		})
+			from: nightDreamFrom !== undefined ? nightDreamFrom : nightDream?.from ? nightDream?.from : null,
+			to: nightDreamTo !== undefined ? nightDreamTo : nightDream?.to ? nightDream?.to : null,
+			rating: nightDreamRating !== undefined ? nightDreamRating : nightDream?.rating ? nightDream?.rating : null,
+			awakenings: [],
+		}
 
-		console.log({ createNightDreamResult })
+		if (nightDream?.id) {
+			await updateNightDream({ ...params, id: nightDream.id })
+		} else {
+			await createNightDream(params)
+		}
 	}
 }
 

@@ -95,7 +95,7 @@ export const FormDay = ({ onSubmit }: FormDayProps) => {
 		control: form.control,
 	})
 
-	const onSubmitTest = async (values: z.infer<typeof formSchema>) => {
+	const submitHandler = async (values: z.infer<typeof formSchema>) => {
 		const mappedData = mapFormDayToCreateDayParams(values)
 
 		await onSubmit(mappedData)
@@ -120,7 +120,7 @@ export const FormDay = ({ onSubmit }: FormDayProps) => {
 	return (
 		<div className="max-w-96 ml-auto mx-auto py-6 px-4">
 			<Form {...form}>
-				<form onSubmit={form.handleSubmit(onSubmitTest)} className="space-y-4">
+				<form onSubmit={form.handleSubmit(submitHandler)} className="space-y-4">
 					<FormField
 						control={form.control}
 						name="dayDate"
