@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Link from 'next/link'
+import { Header } from './components/Header'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,19 +19,10 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={inter.className}>
 				{children}
-				<nav className="py-2 sticky bottom-0 bg-white border-t-2">
-					<ul className="flex justify-center gap-6">
-						<li>
-							<Link href={`/days/${new Date().toISOString().substring(0, 10)}`}>Сегодня</Link>
-						</li>
-						<li>
-							<Link href="/days/create">Создать</Link>
-						</li>
-						<li>
-							<Link href="/days">Все дни</Link>
-						</li>
-					</ul>
-				</nav>
+				<Header />
+				Сегодня: {new Date().toISOString().substring(0, 10)}
+				<br />
+				{`Layout timestamp: ${new Date().getTime()}`}
 			</body>
 		</html>
 	)
