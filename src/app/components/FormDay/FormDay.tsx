@@ -16,6 +16,7 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { createDate } from '@/helpers/createDate'
 
 type FormDayProps = {
 	onSubmit: (params: CreateDay) => void
@@ -54,21 +55,29 @@ const mapFormDayToCreateDayParams = (
 	} = values
 
 	const mappedDayDreams = dayDreams.map((item) => ({
-		from: new Date(`${item.from} ${dayDate}`),
-		to: new Date(`${item.to} ${dayDate}`),
+		from: createDate({ day: dayDate, hoursWithMinutes: item.from }),
+		to: createDate({ day: dayDate, hoursWithMinutes: item.to }),
 	}))
 
 	const mappedNightDreamAwakenings = nightDreamAwakenings.map((item) => ({
-		time: new Date(`${item.time} ${dayDate}`),
+		time: createDate({ day: dayDate, hoursWithMinutes: item.time }),
 	}))
 
 	return {
-		wakeUpTime: new Date(`${wakeUpTime} ${dayDate}`),
-		date: dayDate,
+		wakeUpTime: createDate({
+			day: dayDate,
+			hoursWithMinutes: wakeUpTime,
+		}),
+		date: new Date(dayDate),
+		shortDateId: dayDate,
 		dayDreams: mappedDayDreams,
 		nightDream: {
-			from: nightDreamFrom ? new Date(`${nightDreamFrom} ${dayDate}`) : null,
-			to: nightDreamTo ? new Date(`${nightDreamTo} ${dayDate}`) : null,
+			from: nightDreamFrom
+				? createDate({ day: dayDate, hoursWithMinutes: nightDreamFrom })
+				: null,
+			to: nightDreamTo
+				? createDate({ day: dayDate, hoursWithMinutes: nightDreamTo })
+				: null,
 			rating: nightDreamRating === undefined ? null : Number(nightDreamRating),
 		},
 		nightDreamAwakenings: mappedNightDreamAwakenings,
@@ -97,7 +106,6 @@ export const FormDay = ({ onSubmit }: FormDayProps) => {
 
 	const submitHandler = async (values: z.infer<typeof formSchema>) => {
 		const mappedData = mapFormDayToCreateDayParams(values)
-
 		await onSubmit(mappedData)
 	}
 

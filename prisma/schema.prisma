@@ -10,7 +10,8 @@ datasource db {
 
 model Day {
   id                   Int             @id @default(autoincrement())
-  date                 String          @unique
+  shortDateId          String          @unique
+  date                 DateTime        @unique
   wakeUpTime           DateTime
   dayDreams            DayDream[]
   nightDream           NightDream?

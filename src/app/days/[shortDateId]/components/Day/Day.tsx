@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { updateDay } from '@/api/day'
+import { createDate } from '@/helpers/createDate'
 
 const dayDreamSchema = z.object({
 	from: z.string(),
@@ -77,12 +78,12 @@ export const Day = ({ day }: DayProps) => {
 
 	const submitHandler = async (values: z.infer<typeof formSchema>) => {
 		const mappedDayDreams = values.dayDreams.map((item) => ({
-			from: new Date(`${item.from} ${day.date}`),
-			to: new Date(`${item.to} ${day.date}`),
+			from: createDate({ day: day.shortDateId, hoursWithMinutes: item.from }),
+			to: createDate({ day: day.shortDateId, hoursWithMinutes: item.to }),
 		}))
 
 		const mappedNightDreamAwakenings = values.nightDreamAwakenings.map((item) => ({
-			time: new Date(`${item.time} ${day.date}`),
+			time: createDate({ day: day.shortDateId, hoursWithMinutes: item.time }),
 		}))
 
 		await updateDay({
@@ -90,7 +91,7 @@ export const Day = ({ day }: DayProps) => {
 			dayDreams: mappedDayDreams,
 			nightDream: day.nightDream ? day.nightDream : undefined,
 			nightDreamFrom: values.nightDreamFrom
-				? new Date(`${values.nightDreamFrom} ${day.date}`)
+				? createDate({ day: day.shortDateId, hoursWithMinutes: values.nightDreamFrom })
 				: undefined,
 			nightDreamRating: values.nightDreamRating
 				? Number(values.nightDreamRating)

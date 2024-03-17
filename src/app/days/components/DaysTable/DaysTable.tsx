@@ -26,9 +26,9 @@ import { DayDream } from '@prisma/client'
 
 export const columns: ColumnDef<Day>[] = [
 	{
-		accessorKey: 'date',
+		accessorKey: 'shortDateId',
 		header: 'День',
-		cell: ({ row }) => row.getValue('date'),
+		cell: ({ row }) => row.getValue('shortDateId'),
 	},
 	{
 		accessorKey: 'nightDreamRating',

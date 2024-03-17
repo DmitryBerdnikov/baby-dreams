@@ -4,7 +4,8 @@ import { Day, NightDream, NightDreamAwakening } from '@entities/day'
 import prisma from '../app/lib/prisma'
 
 export type CreateDay = {
-	date: string
+	date: Date
+	shortDateId: string;
 	wakeUpTime: Date
 	dayDreams?: {
 		from: Date
@@ -19,15 +20,19 @@ export type CreateDay = {
 
 export const createDay = async ({
 	date,
+	shortDateId,
 	wakeUpTime,
 	dayDreams,
 	nightDream,
 	nightDreamAwakenings,
 }: CreateDay): Promise<Day> => {
+	console.log({ wakeUpTime, date, dayDreams, nightDream, nightDreamAwakenings })
+
 	const result = await prisma.day.create({
 		data: {
 			date,
 			wakeUpTime,
+			shortDateId,
 			dayDreams: dayDreams
 				? {
 						createMany: {
@@ -216,15 +221,15 @@ export const updateDay = async ({
 }
 
 type FetchDayParams = {
-	date: Day['date']
+	shortDateId: Day['shortDateId']
 }
 
 export const fetchDay = async ({
-	date,
+	shortDateId,
 }: FetchDayParams): Promise<Day | null> => {
 	const day = await prisma.day.findUnique({
 		where: {
-			date,
+			shortDateId,
 		},
 		include: {
 			nightDream: {
