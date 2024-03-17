@@ -1,4 +1,23 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+const getDynamicConfig = () => {
+	/** @type {import('next').NextConfig} */
+	const config = {}
 
-export default nextConfig;
+	if (process.env.DEV) {
+		config.eslint = {
+			ignoreDuringBuilds: true,
+		}
+
+		config.typescript = {
+			ignoreBuildErrors: true,
+		}
+	}
+
+	return config
+}
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+	...getDynamicConfig(),
+}
+
+export default nextConfig
