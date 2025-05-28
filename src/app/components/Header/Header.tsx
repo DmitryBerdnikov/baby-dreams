@@ -17,9 +17,6 @@ export const Header = () => {
 					<Link href="/days">Все дни</Link>
 				</li>
 			</ul>
-			Сегодня header: {new Date().toISOString().substring(0, 10)}
-			<br />
-			{`Header timestamp: ${new Date().getTime()}`}
 		</nav>
 	)
 }

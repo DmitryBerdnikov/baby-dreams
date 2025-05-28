@@ -1,10 +1,10 @@
 'use server'
 
-import { Day, NightDream, NightDreamAwakening } from '@entities/day'
+import { DateString, Day, NightDream, NightDreamAwakening, getTodayDateUTC } from '@entities/day'
 import prisma from '../app/lib/prisma'
 
 export type CreateDay = {
-	date: Date
+	dateString: DateString
 	shortDateId: string;
 	wakeUpTime: Date
 	dayDreams?: {
@@ -19,18 +19,18 @@ export type CreateDay = {
 }
 
 export const createDay = async ({
-	date,
+	dateString,
 	shortDateId,
 	wakeUpTime,
 	dayDreams,
 	nightDream,
 	nightDreamAwakenings,
 }: CreateDay): Promise<Day> => {
-	console.log({ wakeUpTime, date, dayDreams, nightDream, nightDreamAwakenings })
+	const date = getTodayDateUTC(dateString)
 
 	const result = await prisma.day.create({
 		data: {
-			date,
+			date: new Date(new Date(date).toISOString()),
 			wakeUpTime,
 			shortDateId,
 			dayDreams: dayDreams
@@ -221,15 +221,17 @@ export const updateDay = async ({
 }
 
 type FetchDayParams = {
-	shortDateId: Day['shortDateId']
+	dateString: DateString;
 }
 
 export const fetchDay = async ({
-	shortDateId,
+	dateString,
 }: FetchDayParams): Promise<Day | null> => {
+	const resolvedDate = getTodayDateUTC(dateString)
+
 	const day = await prisma.day.findUnique({
 		where: {
-			shortDateId,
+			date: resolvedDate,
 		},
 		include: {
 			nightDream: {

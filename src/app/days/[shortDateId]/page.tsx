@@ -9,7 +9,7 @@ type DayPageProps = {
 }
 
 export default async function DayPage({ params }: DayPageProps) {
-	const day = await fetchDay({ shortDateId: params.shortDateId })
+	const day = await fetchDay({ dateString: params.shortDateId })
 
 	if (!day) {
 		return <div>Дня с датой ${params.shortDateId} не существует <Link href="/days/create">Создать</Link></div>

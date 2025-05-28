@@ -20,9 +20,6 @@ export default function RootLayout({
 			<body className={inter.className}>
 				{children}
 				<Header />
-				Сегодня: {new Date().toISOString().substring(0, 10)}
-				<br />
-				{`Layout timestamp: ${new Date().getTime()}`}
 			</body>
 		</html>
 	)

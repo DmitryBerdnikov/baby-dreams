@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect } from "react";
 
-export const HomePageContent = () => {
+export const HomePage = () => {
   const router = useRouter();
 
   useEffect(() => {
